@@ -1,0 +1,62 @@
+[
+  {
+    "page_id": 1001,
+    "title": "肉丸",
+    "url": "https://dontstarve.wiki.gg/zh/肉丸",
+    "content": "肉丸是一种可以用烹饪锅制作的食物。\n\n制作配方：\n肉度 >= 0.5\n不能有蔬菜度\n烹饪时间: 15秒\n\n属性:\n饥饿值: +62.5\n理智值: +5\n生命值: +3\n\n肉丸是新手最常用的食物之一，因为配方简单且饥饿恢复量大。只需要一块怪物肉加三个浆果或冰块就可以制作。",
+    "html_content": "",
+    "categories": ["食物", "烹饪锅食谱"],
+    "version": "both",
+    "entity_type": "food",
+    "last_modified": null,
+    "crawled_at": "2024-01-01T00:00:00"
+  },
+  {
+    "page_id": 1002,
+    "title": "蜘蛛女皇",
+    "url": "https://dontstarve.wiki.gg/zh/蜘蛛女皇",
+    "content": "蜘蛛女皇是一种Boss级别的生物，会在三级蜘蛛巢生长一段时间后生成。\n\n属性：\n生命值: 2500 (单机) / 2750 (联机)\n伤害: 80\n攻击间隔: 3秒\n移动速度: 1.75\n\n掉落物：\n蜘蛛帽（100%）\n蜘蛛卵（1个）\n怪物肉（4-8个）\n蜘蛛腺体（4个）\n丝绸（6个）\n\n战斗策略：\n1. 蜘蛛女皇会召唤小蜘蛛，建议先清理小蜘蛛再攻击女皇\n2. 可以使用走位技巧，打2-3下跑开躲避攻击\n3. 推荐装备：触手棒/火腿棒 + 足球头盔 + 木甲",
+    "html_content": "",
+    "categories": ["Boss", "生物"],
+    "version": "both",
+    "entity_type": "boss",
+    "last_modified": null,
+    "crawled_at": "2024-01-01T00:00:00"
+  },
+  {
+    "page_id": 1003,
+    "title": "烹饪锅",
+    "url": "https://dontstarve.wiki.gg/zh/烹饪锅",
+    "content": "烹饪锅是一个可制作的建筑，用于烹饪食物。\n\n合成配方：\n木炭 x 6\n石头 x 6\n树枝 x 6\n需要炼金引擎解锁\n\n使用方法：\n1. 放入2-4个食材\n2. 点击开始烹饪\n3. 等待烹饪完成（不同食谱时间不同）\n\n烹饪锅是游戏中最重要的建筑之一，可以将低级食材转化为高价值食物。",
+    "html_content": "",
+    "categories": ["建筑", "科学"],
+    "version": "both",
+    "entity_type": "structure",
+    "last_modified": null,
+    "crawled_at": "2024-01-01T00:00:00"
+  },
+  {
+    "page_id": 1004,
+    "title": "威尔逊",
+    "url": "https://dontstarve.wiki.gg/zh/威尔逊",
+    "content": "威尔逊·珀西瓦尔·希金伯里是饥荒的主角，也是第一个可用的角色。\n\n特点：\n- 生命值: 150\n- 饥饿值: 150\n- 理智值: 200\n- 拥有华丽的胡子\n\n特殊能力：\n威尔逊可以长胡子，胡子可以在冬天提供保暖效果。\n- 4天: 短胡子（隔热15秒）\n- 8天: 中胡子（隔热45秒）\n- 16天: 长胡子（隔热135秒）\n\n胡子可以用剃刀剃掉获得胡须，用于制作肉雕像。",
+    "html_content": "",
+    "categories": ["角色"],
+    "version": "both",
+    "entity_type": "character",
+    "last_modified": null,
+    "crawled_at": "2024-01-01T00:00:00"
+  },
+  {
+    "page_id": 1005,
+    "title": "冬天",
+    "url": "https://dontstarve.wiki.gg/zh/冬天",
+    "content": "冬天是饥荒中的一个季节。\n\n持续时间：\n- 默认15-16天\n- 从第21天开始\n\n特点：\n1. 温度下降，需要保暖\n2. 农作物不生长\n3. 蜂箱不产蜂蜜\n4. 池塘结冰\n5. 巨鹿Boss出现\n\n新手生存建议：\n1. 秋天收集足够的食物\n2. 准备保暖装备（冬帽、暖石）\n3. 建造火堆/灭火器\n4. 准备打巨鹿或躲避巨鹿\n\n推荐装备：\n- 冬帽/贝雷帽\n- 暖石\n- 毛背心（高级）",
+    "html_content": "",
+    "categories": ["季节", "游戏机制"],
+    "version": "both",
+    "entity_type": "season",
+    "last_modified": null,
+    "crawled_at": "2024-01-01T00:00:00"
+  }
+]

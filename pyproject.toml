@@ -1,0 +1,121 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "starve-rag"
+version = "0.1.0"
+description = "饥荒游戏RAG问答助手 - Don't Starve RAG Q&A Assistant"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Starve Team"}
+]
+keywords = ["rag", "dont-starve", "llm", "game-assistant"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    # RAG框架
+    "llama-index>=0.10.0",
+    "llama-index-embeddings-huggingface>=0.2.0",
+    "llama-index-vector-stores-chroma>=0.1.0",
+    "llama-index-llms-openai>=0.1.0",
+
+    # 向量数据库
+    "chromadb>=0.4.0",
+
+    # Embedding模型
+    "sentence-transformers>=2.2.0",
+
+    # 数据采集
+    "requests>=2.31.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=5.0.0",
+
+    # 数据处理
+    "pandas>=2.0.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+
+    # Web服务
+    "fastapi>=0.110.0",
+    "uvicorn>=0.27.0",
+    "streamlit>=1.30.0",
+
+    # Discord Bot
+    "discord.py>=2.3.0",
+
+    # 工具
+    "python-dotenv>=1.0.0",
+    "loguru>=0.7.0",
+    "tqdm>=4.66.0",
+    "tenacity>=8.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "responses>=0.24.0",
+    "ruff>=0.2.0",
+    "mypy>=1.8.0",
+    "pre-commit>=3.6.0",
+    "black>=24.0.0",
+    "isort>=5.13.0",
+]
+
+[project.scripts]
+starve-crawl = "src.crawler.main:main"
+starve-index = "src.indexer.main:main"
+starve-serve = "src.app.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-v --cov=src --cov-report=term-missing"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+
+[tool.black]
+line-length = 100
+target-version = ['py310', 'py311', 'py312']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+    | \.venv
+    | venv
+    | __pycache__
+    | \.pytest_cache
+    | build
+    | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+skip = [".git", ".venv", "venv", "__pycache__", ".pytest_cache", "build", "dist"]
