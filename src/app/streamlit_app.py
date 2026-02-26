@@ -38,7 +38,7 @@ def load_qa_engine() -> Optional[QAEngine]:
                 st.error("未找到知识库索引，请先运行索引工具")
                 return None
 
-            qa_engine = QAEngine(index)
+            qa_engine = QAEngine(index, chroma_collection=indexer.collection)
             st.session_state.qa_engine = qa_engine
             st.session_state.initialized = True
 

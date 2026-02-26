@@ -106,7 +106,7 @@ def create_app() -> FastAPI:
             if index is None:
                 logger.warning("未找到索引，请先运行索引工具")
             else:
-                qa_engine = QAEngine(index)
+                qa_engine = QAEngine(index, chroma_collection=indexer.collection)
                 logger.info("问答引擎初始化完成")
 
         except Exception as e:

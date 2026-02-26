@@ -125,6 +125,29 @@ class VectorIndexer:
             "count": self.collection.count(),
         }
 
+    def get_all_documents(self) -> list[dict]:
+        """从ChromaDB获取所有文档（供BM25等使用）
+
+        Returns:
+            [{"id": ..., "document": ..., "metadata": ...}, ...]
+        """
+        count = self.collection.count()
+        if count == 0:
+            return []
+
+        result = self.collection.get(include=["documents", "metadatas"])
+        docs = []
+        for doc_id, document, metadata in zip(
+            result["ids"], result["documents"], result["metadatas"]
+        ):
+            if document:
+                docs.append({
+                    "id": doc_id,
+                    "document": document,
+                    "metadata": metadata or {},
+                })
+        return docs
+
     def clear_collection(self):
         """清空集合"""
         self.chroma_client.delete_collection(self.collection_name)

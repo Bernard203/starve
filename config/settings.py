@@ -8,18 +8,38 @@ import os
 from pathlib import Path
 from typing import Literal
 
+from dotenv import load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+load_dotenv()
 
-# 项目根目录
+
+def _hf_model_cached(model_name: str) -> bool:
+    """检查HuggingFace模型是否已缓存到本地"""
+    cache_dir = Path(
+        os.environ.get("HF_HUB_CACHE", "")
+        or Path(os.environ.get("HF_HOME", Path.home() / ".cache" / "huggingface")) / "hub"
+    )
+    model_dir = cache_dir / f"models--{model_name.replace('/', '--')}"
+    return model_dir.is_dir() and any(model_dir.iterdir())
+
+
+# HuggingFace下载：
+if os.environ.get("HF_HUB_OFFLINE") != "1":
+    _embedding_model = os.environ.get("EMBEDDING_MODEL_NAME", "BAAI/bge-large-zh-v1.5")
+    _reranker_model = os.environ.get("RETRIEVER_RERANKER_MODEL", "BAAI/bge-reranker-base")
+    if _hf_model_cached(_embedding_model) and _hf_model_cached(_reranker_model):
+        os.environ["HF_HUB_OFFLINE"] = "1"
+        os.environ["TRANSFORMERS_OFFLINE"] = "1"
+
+
 PROJECT_ROOT = Path(__file__).parent.parent
 DATA_DIR = PROJECT_ROOT / "data"
 RAW_DATA_DIR = DATA_DIR / "raw"
 PROCESSED_DATA_DIR = DATA_DIR / "processed"
 VECTOR_DB_DIR = DATA_DIR / "vectors"
 
-# 确保目录存在
 for dir_path in [RAW_DATA_DIR, PROCESSED_DATA_DIR, VECTOR_DB_DIR]:
     dir_path.mkdir(parents=True, exist_ok=True)
 
@@ -62,17 +82,14 @@ class EmbeddingSettings(BaseSettings):
 
     model_config = SettingsConfigDict(env_prefix="EMBEDDING_")
 
-    # 模型选择
     model_name: str = Field(
         default="BAAI/bge-large-zh-v1.5",
         description="Embedding模型名称"
     )
 
-    # 分块参数
     chunk_size: int = Field(default=512, description="文档分块大小")
     chunk_overlap: int = Field(default=100, description="分块重叠大小")
 
-    # 设备配置
     device: str = Field(default="auto", description="计算设备: auto/cpu/cuda")
 
 
@@ -91,15 +108,12 @@ class LLMSettings(BaseSettings):
 
     model_config = SettingsConfigDict(env_prefix="LLM_")
 
-    # 当前激活的提供商和模型
     active_provider: str = Field(default="ollama", description="当前提供商")
     active_model: str = Field(default="qwen2.5:7b", description="当前模型")
 
-    # 生成参数
     temperature: float = Field(default=0.7, description="生成温度")
     max_tokens: int = Field(default=2048, description="最大生成token数")
 
-    # 各提供商配置
     openai: LLMProviderConfig = Field(
         default_factory=lambda: LLMProviderConfig(
             enabled=True,
@@ -166,12 +180,10 @@ class LLMSettings(BaseSettings):
     # 兼容旧配置（向后兼容）
     @property
     def provider(self) -> str:
-        """兼容旧配置"""
         return self.active_provider
 
     @property
     def model_name(self) -> str:
-        """兼容旧配置"""
         return self.active_model
 
     @property
@@ -283,5 +295,4 @@ class Settings(BaseSettings):
     vector_db_dir: Path = VECTOR_DB_DIR
 
 
-# 全局配置实例
 settings = Settings()

@@ -5,8 +5,11 @@
 import json
 import argparse
 import logging
+import sys
 from pathlib import Path
 from typing import List, Generator
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from config import settings, PROCESSED_DATA_DIR, VECTOR_DB_DIR
 from src.utils.models import Document, WikiPage, EntityType, GameVersion
@@ -115,7 +118,7 @@ class DataIntegrator:
                         'doc_type': 'summary',
                         'entity_type': entity_type.value,
                         'version': version,
-                        'categories': categories[:5],
+                        'categories': ', '.join(categories[:5]),
                     },
                     source_type='wiki',
                     source_url=base_url,
@@ -137,7 +140,7 @@ class DataIntegrator:
                         'doc_type': 'infobox',
                         'entity_type': entity_type.value,
                         'version': version,
-                        'stats': stats,
+                        'stats': json.dumps(stats, ensure_ascii=False),
                     },
                     source_type='wiki',
                     source_url=base_url,
@@ -165,7 +168,7 @@ class DataIntegrator:
                             'doc_type': 'recipe',
                             'entity_type': 'recipe',
                             'version': version,
-                            'ingredients': ingredients,
+                            'ingredients': ', '.join(ingredients),
                         },
                         source_type='wiki',
                         source_url=base_url,
@@ -185,7 +188,7 @@ class DataIntegrator:
                             'doc_type': 'content',
                             'entity_type': entity_type.value,
                             'version': version,
-                            'categories': categories[:5],
+                            'categories': ', '.join(categories[:5]),
                         },
                         source_type='wiki',
                         source_url=base_url,

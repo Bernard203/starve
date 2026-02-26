@@ -26,7 +26,7 @@ class QAResponse:
 class QAEngine:
     """RAG问答引擎"""
 
-    def __init__(self, index: VectorStoreIndex):
+    def __init__(self, index: VectorStoreIndex, chroma_collection=None):
         self.llm_config = settings.llm
         self.index = index
 
@@ -35,7 +35,7 @@ class QAEngine:
         self.current_model = self.llm_config.active_model
 
         # 初始化检索器
-        self.retriever = HybridRetriever(index)
+        self.retriever = HybridRetriever(index, chroma_collection=chroma_collection)
         self.reranker = Reranker()
 
         # 初始化LLM

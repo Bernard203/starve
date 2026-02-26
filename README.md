@@ -26,7 +26,7 @@
 
 ```bash
 # 克隆项目
-git clone <repository-url>
+git clone git@github.com:Bernard203/starve.git
 cd starve
 
 # 创建虚拟环境
@@ -93,7 +93,7 @@ streamlit run src/app/streamlit_app.py
 
 启动后访问：
 - API 文档：http://localhost:8000/docs
-- 健康检查：http://localhost:8000/health
+- 状态检查：http://localhost:8000/health
 
 ---
 

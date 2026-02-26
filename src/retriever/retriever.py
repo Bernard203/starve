@@ -17,6 +17,11 @@ from .cache import QueryCache
 from .query_processor import QueryProcessor, ProcessedQuery, QueryType
 from .mmr import MMRDiversifier, ContentBasedDiversifier
 
+try:
+    import chromadb
+except ImportError:
+    chromadb = None
+
 
 @dataclass
 class RetrievalResult:
@@ -32,9 +37,10 @@ class RetrievalResult:
 class HybridRetriever:
     """混合检索器：结合向量检索、BM25和多种优化技术"""
 
-    def __init__(self, index: VectorStoreIndex):
+    def __init__(self, index: VectorStoreIndex, chroma_collection=None):
         self.config = settings.retriever
         self.index = index
+        self._chroma_collection = chroma_collection
 
         # 创建向量检索器
         self.vector_retriever = VectorIndexRetriever(
@@ -73,20 +79,40 @@ class HybridRetriever:
                     f"Cache={self.config.use_cache}, MMR={self.config.use_mmr})")
 
     def _init_bm25(self):
-        """初始化BM25检索器"""
+        """初始化BM25检索器，直接从ChromaDB读取文档"""
         try:
-            # 从索引中获取所有文档
-            docstore = self.index.docstore
-            if docstore:
-                nodes = list(docstore.docs.values())
-                if nodes:
-                    bm25_docs = BM25IndexBuilder.from_nodes(nodes)
-                    self._bm25_retriever = BM25Retriever(bm25_docs)
-                    logger.info(f"BM25索引构建完成: {len(bm25_docs)}个文档")
-                else:
-                    logger.warning("BM25: 文档库为空")
+            bm25_docs = []
+
+            # 优先从ChromaDB读取，避免依赖docstore的额外持久化
+            if self._chroma_collection is not None:
+                count = self._chroma_collection.count()
+                if count > 0:
+                    result = self._chroma_collection.get(
+                        include=["documents", "metadatas"]
+                    )
+                    for doc_id, document, metadata in zip(
+                        result["ids"], result["documents"], result["metadatas"]
+                    ):
+                        if document:
+                            bm25_docs.append(BM25Document(
+                                doc_id=doc_id,
+                                content=document,
+                                metadata=metadata or {},
+                            ))
+
+            # 回退：从docstore读取（兼容不传chroma_collection的情况）
+            if not bm25_docs:
+                docstore = self.index.docstore
+                if docstore:
+                    nodes = list(docstore.docs.values())
+                    if nodes:
+                        bm25_docs = BM25IndexBuilder.from_nodes(nodes)
+
+            if bm25_docs:
+                self._bm25_retriever = BM25Retriever(bm25_docs)
+                logger.info(f"BM25索引构建完成: {len(bm25_docs)}个文档")
             else:
-                logger.warning("BM25: 无法获取文档库")
+                logger.warning("BM25: 文档库为空")
         except Exception as e:
             logger.error(f"BM25初始化失败: {e}")
             self._bm25_retriever = None

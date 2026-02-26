@@ -97,6 +97,9 @@ class CrawlPipeline:
                     logger.error(f"处理 {source.value} 失败: {e}")
                     stats['sources'][source.value] = {'error': str(e)}
 
+        if save_intermediate:
+            self._merge_cleaned_pages()
+
         logger.info(f"流水线完成: 爬取{stats['total_crawled']}, "
                     f"清洗{stats['total_cleaned']}, 过滤后{stats['total_filtered']}")
 
@@ -171,6 +174,25 @@ class CrawlPipeline:
             )
 
         logger.info(f"保存 {len(pages)} 个清洗后页面到 {output_path}")
+
+    def _merge_cleaned_pages(self):
+        """合并各数据源的清洗结果为 cleaned_pages.json"""
+        all_pages = []
+
+        for source in self.sources:
+            source_file = PROCESSED_DATA_DIR / f"{source.value}_cleaned.json"
+            if not source_file.exists():
+                continue
+
+            with open(source_file, 'r', encoding='utf-8') as f:
+                pages = json.load(f)
+                all_pages.extend(pages)
+
+        if all_pages:
+            output_path = PROCESSED_DATA_DIR / "cleaned_pages.json"
+            with open(output_path, 'w', encoding='utf-8') as f:
+                json.dump(all_pages, f, ensure_ascii=False, indent=2)
+            logger.info(f"合并 {len(all_pages)} 个页面到 {output_path}")
 
     def to_wiki_pages(self, cleaned_pages: List[CleanedPage]) -> List[WikiPage]:
         """
