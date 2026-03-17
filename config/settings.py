@@ -6,8 +6,6 @@
 
 import os
 from pathlib import Path
-from typing import Literal
-
 from dotenv import load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -49,11 +47,6 @@ class CrawlerSettings(BaseSettings):
 
     model_config = SettingsConfigDict(env_prefix="CRAWLER_")
 
-    # Wiki URL配置
-    wiki_base_url: str = "https://dontstarve.wiki.gg"
-    wiki_api_url: str = "https://dontstarve.wiki.gg/zh/api.php"
-    wiki_lang: str = "zh"
-
     # 爬取限制
     request_delay: float = Field(default=1.0, description="请求间隔(秒)")
     max_pages: int = Field(default=1000, description="最大爬取页数")
@@ -62,19 +55,6 @@ class CrawlerSettings(BaseSettings):
 
     # User-Agent
     user_agent: str = "StarveRAG/1.0 (Educational Purpose)"
-
-    # 需要爬取的主要分类
-    categories: list[str] = [
-        "物品", "食物", "生物", "角色", "合成",
-        "烹饪锅食谱", "建筑", "工具", "武器", "护甲",
-        "魔法", "科学", "生物群系", "季节", "Boss",
-    ]
-
-    # 需要排除的命名空间
-    exclude_namespaces: list[str] = [
-        "Template", "Category", "File", "User",
-        "Talk", "Help", "MediaWiki",
-    ]
 
 
 class EmbeddingSettings(BaseSettings):

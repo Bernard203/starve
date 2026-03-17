@@ -283,7 +283,7 @@ class FandomCrawler(MediaWikiCrawler):
         source_config = DEFAULT_SOURCE_CONFIGS[DataSource.FANDOM]
         super().__init__(
             api_url=source_config.api_url,
-            base_url=source_config.base_url,
+            base_url=soure_config.base_url,
             source=DataSource.FANDOM,
             categories=source_config.categories,
             config=config,

@@ -42,10 +42,6 @@ from .cleaners import (
     QualityAssessor,
 )
 
-# 旧版兼容
-from .wiki_crawler import WikiCrawler
-from .parser import WikiParser
-
 # 入口函数
 from .main import main
 
@@ -78,10 +74,6 @@ __all__ = [
     'SteamCleaner',
     'DataNormalizer',
     'QualityAssessor',
-
-    # 旧版兼容
-    'WikiCrawler',
-    'WikiParser',
 
     # 入口
     'main',

@@ -4,10 +4,8 @@
 """
 
 import time
-import asyncio
 from typing import Optional, TYPE_CHECKING
 from dataclasses import dataclass, field
-from concurrent.futures import ThreadPoolExecutor
 
 from src.utils.logger import logger
 

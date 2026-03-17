@@ -155,9 +155,6 @@ def validate_arguments(args) -> list[str]:
     if not 0 <= args.min_quality <= 1:
         issues.append("--min-quality 必须在 0 到 1 之间")
 
-    if args.chunk_size < 100:
-        issues.append("--chunk-size 不应小于 100")
-
     return issues
 
 
@@ -213,7 +210,7 @@ def run_crawler(mode: str = 'categories', max_pages: int = None, categories: lis
         RuntimeError: 爬虫运行错误
     """
     try:
-        from src.crawler import WikiCrawler
+        from src.crawler import WikiGGCrawler
     except ImportError as e:
         raise DependencyError(f"无法导入爬虫模块: {e}") from e
 
@@ -222,19 +219,23 @@ def run_crawler(mode: str = 'categories', max_pages: int = None, categories: lis
     logger.info("=" * 50)
 
     try:
-        crawler = WikiCrawler()
+        import json
+        from config import RAW_DATA_DIR
+        crawler = WikiGGCrawler()
     except Exception as e:
         raise RuntimeError(f"爬虫初始化失败: {e}") from e
 
     try:
-        # 使用新的crawl接口
         pages = list(crawler.crawl(max_pages=max_pages))
 
         if not pages:
             logger.warning("未爬取到任何页面")
             return 0
 
-        crawler.save_pages(pages)
+        output_path = RAW_DATA_DIR / "wiki_pages.json"
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump([p.to_dict() for p in pages], f, ensure_ascii=False, indent=2)
+
         logger.info(f"爬取完成，共 {len(pages)} 个页面")
         return len(pages)
 
@@ -317,7 +318,7 @@ def run_cleaner(min_quality: float = 0.2):
                 # 转换为RawPage格式
                 raw_page = RawPage(
                     source=DS.WIKI_GG,
-                    source_id=str(page_data.get('page_id', '')),
+                    source_id=str(page_data.get('source_id', page_data.get('page_id', ''))),
                     title=page_data.get('title', ''),
                     url=page_data.get('url', ''),
                     content=page_data.get('content', ''),
@@ -358,15 +359,15 @@ def run_cleaner(min_quality: float = 0.2):
         raise RuntimeError(f"数据清洗失败: {e}") from e
 
 
-def run_document_processor(chunk_size: int = 512):
+def run_document_processor():
     """
-    运行文档处理器
+    运行文档处理器（结构化分块 + 向量建索引）
 
-    Args:
-        chunk_size: 文档分块大小
+    从 cleaned_pages.json 读取 CleanedPage 数据，
+    利用结构化字段（sections/infobox/recipes）分块后写入向量数据库。
 
     Returns:
-        生成的文档数量
+        生成的文档块数量
 
     Raises:
         DependencyError: 索引模块不可用
@@ -374,6 +375,7 @@ def run_document_processor(chunk_size: int = 512):
     """
     try:
         from src.indexer.document_processor import DocumentProcessor
+        from src.indexer.indexer import VectorIndexer
     except ImportError as e:
         raise DependencyError(
             f"无法导入文档处理模块: {e}\n"
@@ -381,24 +383,40 @@ def run_document_processor(chunk_size: int = 512):
         ) from e
 
     logger.info("=" * 50)
-    logger.info("步骤 3/3: 生成RAG文档")
+    logger.info("步骤 3/3: 生成RAG文档（结构化分块）")
     logger.info("=" * 50)
 
     try:
-        processor = DocumentProcessor(chunk_size=chunk_size)
-        documents = processor.process_all()
+        from config import PROCESSED_DATA_DIR
+
+        cleaned_file = PROCESSED_DATA_DIR / "cleaned_pages.json"
+        if not cleaned_file.exists():
+            logger.error(f"未找到清洗数据: {cleaned_file}")
+            logger.info("提示: 请先运行清洗步骤 (python run.py --step clean)")
+            raise FileNotFoundError(f"清洗数据文件不存在: {cleaned_file}")
+
+        pages = DocumentProcessor.load_cleaned_pages(str(cleaned_file))
+        if not pages:
+            logger.warning("未加载到任何页面，请检查数据文件")
+            return 0
+
+        processor = DocumentProcessor()
+        documents = list(processor.process_cleaned_pages(pages))
 
         if not documents:
-            logger.warning("未生成任何文档")
+            logger.warning("未生成任何文档块")
             logger.info("提示: 请确保已运行清洗步骤且有有效数据")
             return 0
 
-        logger.info(f"文档生成完成，共 {len(documents)} 个文档")
+        # 写入向量数据库
+        indexer = VectorIndexer()
+        indexer.index_documents(documents)
+
+        stats = indexer.get_collection_stats()
+        logger.info(f"文档生成完成，共 {len(documents)} 个文档块（索引总量: {stats['count']}）")
         return len(documents)
 
-    except FileNotFoundError as e:
-        logger.error(f"输入文件不存在: {e}")
-        logger.info("提示: 请先运行清洗步骤")
+    except FileNotFoundError:
         raise
     except Exception as e:
         logger.error(f"文档处理错误: {e}")
@@ -489,8 +507,6 @@ def main():
                         help='运行步骤: crawl/clean/docs/all/pipeline (默认: pipeline)')
     parser.add_argument('--min-quality', type=float, default=0.2,
                         help='最低质量分数 (0-1)')
-    parser.add_argument('--chunk-size', type=int, default=512,
-                        help='文档分块大小')
     parser.add_argument('--skip-check', action='store_true',
                         help='跳过运行前检查')
     parser.add_argument('--verbose', '-v', action='store_true',
@@ -531,7 +547,7 @@ def main():
                 logger.info("提示: 检查网络连接或尝试减少 --max-pages 值")
             else:
                 run_cleaner(args.min_quality)
-                run_document_processor(args.chunk_size)
+                run_document_processor()
 
         elif args.step == 'crawl':
             run_crawler(max_pages=args.max_pages)
@@ -540,7 +556,7 @@ def main():
             run_cleaner(args.min_quality)
 
         elif args.step == 'docs':
-            run_document_processor(args.chunk_size)
+            run_document_processor()
 
         logger.info("=" * 50)
         logger.info("全部完成！")

@@ -2,7 +2,7 @@
 
 import re
 from typing import Dict, Generator, List, Optional
-from urllib.parse import quote, urljoin
+from urllib.parse import quote
 from bs4 import BeautifulSoup
 
 from src.utils.logger import logger

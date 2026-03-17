@@ -10,7 +10,6 @@ from llama_index.core import (
     StorageContext,
     Settings as LlamaSettings,
 )
-from llama_index.core.node_parser import SentenceSplitter
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.vector_stores.chroma import ChromaVectorStore
 

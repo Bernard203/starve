@@ -17,14 +17,6 @@ class TestHybridRetriever:
         mock = MagicMock()
         return mock
 
-    @pytest.fixture
-    def mock_retriever(self, mock_index):
-        """创建模拟的检索器"""
-        with patch.object(HybridRetriever, "_build_synonym_map", return_value={}):
-            with patch("src.retriever.retriever.VectorIndexRetriever"):
-                retriever = HybridRetriever(mock_index)
-                return retriever
-
     def test_expand_query_with_synonym(self):
         """测试同义词扩展"""
         with patch.object(HybridRetriever, "__init__", lambda x, y: None):
@@ -48,17 +40,6 @@ class TestHybridRetriever:
             expanded = retriever.expand_query(query)
 
             assert expanded == query
-
-    def test_build_synonym_map(self):
-        """测试同义词映射构建"""
-        with patch.object(HybridRetriever, "__init__", lambda x, y: None):
-            retriever = HybridRetriever(None)
-            synonym_map = retriever._build_synonym_map()
-
-            # 检查默认同义词
-            assert "蒸肉丸" in synonym_map
-            assert synonym_map["蒸肉丸"] == "肉丸"
-
 
 class TestReranker:
     """Reranker测试类"""
